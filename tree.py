@@ -1,28 +1,26 @@
-"""
-   Author: Josh Gillum              .
-   Date: 18 July 2025              ":"         __ __
-                                  __|___       \ V /
-                                .'      '.      | |
-                                |  O       \____/  |
-^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
-
-    This is a general use tree class. It can handle arbitrary depths,
-    and can hold nodes of either strings or additional tree objects.
-    The tree works by building the tree from the deepest point up,
-    allowing it to figure out the size needed for shallower elements.
-
-    Also supports setting the display characters to either fancy or basic.
-    Basic display uses characters only found within 7 bit ASCII, while
-    fance uses other characters. If the tree's branches aren't displaying
-    correctly or are weird characters, try setting the fancy value to False.
-
-    Updates to the tree object will only affect this level. To update deeper
-    levels as well, the cascading_update line of functions must be used.
-    These will recursively update the deeper nodes, then the current nodes.
-
-
-^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
-"""
+#   Author: Josh Gillum              .
+#   Date: 18 July 2025              ":"         __ __
+#                                  __|___       \ V /
+#                                .'      '.      | |
+#                                |  O       \____/  |
+#^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
+#
+#    This is a general use tree class. It can handle arbitrary depths,
+#    and can hold nodes of either strings or additional tree objects.
+#    The tree works by building the tree from the deepest point up,
+#    allowing it to figure out the size needed for shallower elements.
+#
+#    Also supports setting the display characters to either fancy or basic.
+#    Basic display uses characters only found within 7 bit ASCII, while
+#    fance uses other characters. If the tree's branches aren't displaying
+#    correctly or are weird characters, try setting the fancy value to False.
+#
+#    Updates to the tree object will only affect this level. To update deeper
+#    levels as well, the cascading_update line of functions must be used.
+#    These will recursively update the deeper nodes, then the current nodes.
+#
+#
+#^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
 
 from .formatString import tabulate
 

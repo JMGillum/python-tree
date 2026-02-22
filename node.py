@@ -1,22 +1,20 @@
-"""
-   Author: Josh Gillum              .
-   Date: 18 July 2025              ":"         __ __
-                                  __|___       \ V /
-                                .'      '.      | |
-                                |  O       \____/  |
-^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
-
-    This node class is a child class of Tree, meaning that it is basically
-    a tree that can store its own data on top of having (optional) children.
-    It also features improved str casting, as it can store a function to call
-    whenever it is cast to string.
-
-    This class is best used when the stored data has child data as well, or
-    just if the data is too much/complex to just be stored as the name of the
-    tree.
-
-^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
-"""
+#   Author: Josh Gillum              .
+#   Date: 18 July 2025              ":"         __ __
+#                                  __|___       \ V /
+#                                .'      '.      | |
+#                                |  O       \____/  |
+#^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
+#
+#    This node class is a child class of Tree, meaning that it is basically
+#    a tree that can store its own data on top of having (optional) children.
+#    It also features improved str casting, as it can store a function to call
+#    whenever it is cast to string.
+#
+#    This class is best used when the stored data has child data as well, or
+#    just if the data is too much/complex to just be stored as the name of the
+#    tree.
+#
+#^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~~^~
 
 from .tree import Tree
 
