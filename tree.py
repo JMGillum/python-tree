@@ -1,5 +1,5 @@
 #   Author: Josh Gillum              .
-#   Date: 18 July 2025              ":"         __ __
+#   Date: 23 February 2026          ":"         __ __
 #                                  __|___       \ V /
 #                                .'      '.      | |
 #                                |  O       \____/  |
@@ -54,6 +54,34 @@ class Tree:
             wrap = -1
         self.set_term_size(width)
         self.set_line_wrap(wrap)
+        self.display_order = None
+
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def __iter__(self):
+        self.current_node = 0
+        return self
+
+    def __next__(self):
+        val = None
+        if self.current_node < len(self.nodes):
+            if isinstance(self.nodes,list):
+                key = self.current_node
+                val = self.nodes[self.current_node]
+            elif isinstance(self.nodes,dict):
+                key = list(self.nodes.keys())[self.current_node]
+                val = self.nodes[key]
+            self.current_node += 1
+            #print(f"Key: '{key}', val: '{val}'")
+            return (key,val)
+        raise StopIteration
+
+
+    
+    def set_display_order(self, order):
+        self.display_order = order
 
     def set_name(self, name: str):
         """Sets the name of the tree object
@@ -70,6 +98,8 @@ class Tree:
         Args:
             nodes (list | dict | None): A list or dict of nodes for the tree
         """
+        if nodes is None:
+            nodes = []
         if not isinstance(nodes, list) and not isinstance(nodes,dict):
             nodes = [nodes]
         self.nodes = nodes
@@ -106,7 +136,7 @@ class Tree:
         if self.nodes is not None:
             items = self.nodes
             if isinstance(self.nodes,dict):
-                items = self.nodes.values()
+                items = list(self.nodes.values())
 
             if isinstance(items,list):
                 for item in items:
@@ -232,9 +262,12 @@ class Tree:
         # Saves values so they can be restored after building tree
         name = self.name
         nodes = self.nodes
+        display_order = self.display_order
         child = Tree(
             name, nodes, fancy=self.fancy, wrap=self.line_wrap, width=self.width
         )
+        child.set_display_order(self.display_order)
+        self.display_order = None
         self.name = None
         self.nodes = [child]
         # Gets the tree, as a list of lines
@@ -251,6 +284,7 @@ class Tree:
         # Restores the original values of the name and nodes.
         self.name = name
         self.nodes = nodes
+        self.display_order = display_order
         self.dirty = False
         return self.string if as_a_string else self.list
 
@@ -302,28 +336,38 @@ class Tree:
         if self.nodes is not None:  # This object has some children nodes
             keys = []
             if isinstance(self.nodes,list):
-                keys = [x for x in range(len(self.nodes))]
+                if self.display_order:
+                    keys = self.display_order
+                else:
+                    keys = [x for x in range(len(self.nodes))]
             elif isinstance(self.nodes,dict):
-                keys = self.nodes.keys()
-            for i in keys:  # Loops through each node
-                item = self.nodes[i]
-                if isinstance(
-                    item, Tree
-                ):  # If the child node is another Tree object, generate that object.
-                    child_last = (
-                        i == len(self.nodes) - 1
-                    )  # Boolean as to whether this is the last child of this node
-                    prefix = (
-                        self.end if last else self.branch
-                    )  # Determines if this is the last child node of its parent, and sets branch character accordingly
+                if self.display_order:
+                    keys = self.display_order
+                else:
+                    keys = self.nodes.keys()
+            for i in range(len(keys)):  # Loops through each node
+                key = keys[i]
+                item = self.nodes[key]
+
+                # If the child node is another Tree object, generate that object.
+                if isinstance(item, Tree):
+
+                    # Boolean as to whether this is the last child of this node
+                    child_last = (i == len(self.nodes) - 1 )  
+
+                    # Determines if this is the last child node of its parent,
+                    # and sets branch character accordingly
+                    prefix = (self.end if last else self.branch)
+
                     # Generate the child node, indicating whether it is the last node.
                     child = item.__recursive_generation(
                         child_last, len(prefix) + prior_prefix
                     )
-                    for j in range(
-                        1, len(child)
-                    ):  # Loops through all lines returned from child node
+
+                    # Loops through all lines returned from child node
+                    for j in range(1, len(child)):  
                         line = child[j]
+
                         # Set prefix according to whether this is the last child node or not
                         if i != len(self.nodes) - 1:
                             child[j] = self.pipe
@@ -331,12 +375,14 @@ class Tree:
                             child[j] = self.space
                         if len(line) > 0 and line[0] != self.split_line:
                             child[j] += self.space
-                        child[j] += (
-                            line  # Add the lines from the inner tree back to the prefixes.
-                        )
-                    string += (
-                        child  # Add the lines of the child to the lines of this tree
-                    )
+
+                        # Add the lines from the inner tree back to the prefixes.
+                        child[j] += line
+
+                    # Add the lines of the child to the lines of this tree
+                    string += child  
+
+                # Child node is not another Tree object
                 else:
                     if item is not None:
                         item = str(item)
