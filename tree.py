@@ -39,7 +39,7 @@ class Tree:
 
         Args:
             name (str, optional): The name of the tree. Printed at the current level before its child nodes. Defaults to None.
-            nodes (list | None, optional): The children nodes of the tree. Defaults to None.
+            nodes (list | dict | None, optional): The children nodes of the tree. Defaults to None.
             fancy (bool, optional): Whether fancy (7-bit ASCII) characters will be used. Defaults to False.
             wrap (int, optional): The max width of a single node when printed. Defaults to None.
             width (int, optional): The max width of the entire tree when printed. Defaults to None.
@@ -64,18 +64,39 @@ class Tree:
         self.name = name
         self.dirty = True
 
-    def set_nodes(self, nodes: list | None):
+    def set_nodes(self, nodes: list | dict | None):
         """Sets the nodes of the tree. Overwrites any previous nodes
 
         Args:
-            nodes (list | None): A list of nodes for the tree
+            nodes (list | dict | None): A list or dict of nodes for the tree
         """
-        if not isinstance(nodes, list):
+        if not isinstance(nodes, list) and not isinstance(nodes,dict):
             nodes = [nodes]
         self.nodes = nodes
         self.dirty = True
 
-    def set_fancy(self, set_fancy: bool):
+    def __cascade(self,functions,args):
+        if not isinstance(functions,list):
+            functions = [functions]
+        if not isinstance(args,list):
+            args = [args]
+        if not len(functions) == len(args):
+            return
+
+        if self.nodes is not None:
+            items = self.nodes
+            if isinstance(self.nodes,dict):
+                items = self.nodes.values()
+
+            if isinstance(items,list):
+                for item in items:
+                    if isinstance(item, Tree):
+                        for i in range(len(functions)):
+                            fun = getattr(item,functions[i])
+                            fun(*(args[i]))
+
+
+    def set_fancy(self, set_fancy: bool, cascade=False):
         """Sets the fancy variable for this tree (whether non 7-bit ASCII characters will be used when printing)
 
         Args:
@@ -83,6 +104,9 @@ class Tree:
         """
         self.fancy = set_fancy
         self.__set_characters()
+        if cascade:
+            self.__cascade("set_fancy",(set_fancy,cascade))
+
 
     def __set_characters(self):
         """Sets the characters to be used by the tree when printing. Should not be called
@@ -102,7 +126,7 @@ class Tree:
             self.nameless = "\\"
         self.split_line = "~"
 
-    def set_term_size(self, width=80):
+    def set_term_size(self, width=80, cascade=False):
         """Sets the max width of the tree when printed
 
         Args:
@@ -110,8 +134,10 @@ class Tree:
         """
         if width is not None:
             self.width = width
+        if cascade:
+            self.__cascade("set_term_size",(width,cascade))
 
-    def set_line_wrap(self, line_width: int):
+    def set_line_wrap(self, line_width: int, cascade=False):
         """Sets the line_wrap variable
 
         Args:
@@ -119,59 +145,40 @@ class Tree:
         """
         if line_width is not None:
             self.line_wrap = line_width
+        if cascade:
+            self.__cascade("set_line_wrap",(line_width,cascade))
 
-    def cascading_update(
-        self, set_fancy: bool = None, line_width: int = None, term_width: int = None
+
+    def update(
+        self, set_fancy: bool = None, line_width: int = None, term_width: int = None, cascade=False
     ):
-        """Updates the tree and all of its child Tree objects
+        """Updates the tree and optionally, all of its child Tree objects
 
         Args:
             set_fancy (bool, optional): Determines whether non 7-bit ASCII characters will be used when printing the tree. Defaults to None.
             line_width (int, optional): The max width of a single node when printed. Defaults to None.
             term_width (int, optional): The max width of the entire tree when printed. Defaults to None.
+            cascade: Whether to cascade the update down the tree or not.
         """
+
+        funs = []
+        args = []
         if set_fancy is not None:
-            self.cascading_set_fancy(set_fancy)
+            self.set_fancy(set_fancy,cascade=False)
+            funs.append("set_fancy")
+            args.append((set_fancy,cascade))
         if line_width is not None:
-            self.cascading_set_line_wrap(line_width)
+            self.set_line_wrap(line_width,cascade=False)
+            funs.append("set_line_wrap")
+            args.append((line_width,cascade))
         if term_width is not None:
-            self.cascading_set_term_size(term_width)
+            self.set_term_size(term_width,cascade=False)
+            funs.append("set_term_size")
+            args.append((term_width,cascade))
 
-    def cascading_set_fancy(self, set_fancy: bool):
-        """Sets fancy for all of the child nodes of this tree, then for itself
+        if cascade:
+            self.__cascade(funs,args)
 
-        Args:
-            set_fancy (bool): Sets the self.fancy variable
-        """
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_fancy(set_fancy)
-        self.set_fancy(set_fancy)
-
-    def cascading_set_term_size(self, width: int):
-        """Sets the term size for all child nodes of this tree, then for itself
-
-        Args:
-            width (int): Sets the self.width variable
-        """
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_term_size(width)
-        self.set_term_size(width)
-
-    def cascading_set_line_wrap(self, line_width: int):
-        """Sets the line_wrap variable for all child nodes of this tree, then for itself
-
-        Args:
-            line_width (int): Sets the self.line_wrap variable
-        """
-        if self.nodes is not None:
-            for item in self.nodes:
-                if isinstance(item, Tree):
-                    item.cascading_set_line_wrap(line_width)
-        self.set_line_wrap(line_width)
 
     def print(self, as_a_string=False, remove_root_branch=True) -> str | list:
         """Provides the tree in a printable form.
