@@ -344,7 +344,7 @@ class Tree:
                 if self.display_order:
                     keys = self.display_order
                 else:
-                    keys = self.nodes.keys()
+                    keys = list(self.nodes.keys())
             for i in range(len(keys)):  # Loops through each node
                 key = keys[i]
                 item = self.nodes[key]
