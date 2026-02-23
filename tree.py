@@ -75,6 +75,26 @@ class Tree:
         self.nodes = nodes
         self.dirty = True
 
+    def add_node(self, node, key=None):
+        if self.nodes is None:
+            if key is None:
+                self.nodes = [node]
+                return self.nodes[-1]
+            else:
+                self.nodes = {key:node}
+                return self.nodes[key]
+        elif isinstance(self.nodes,dict):
+            if key is not None:
+                self.nodes |= {key:node}
+                return self.nodes[key]
+            else:
+                return None
+        elif isinstance(self.nodes,list):
+            self.nodes.append(node)
+            return self.nodes[-1]
+        return None
+
+
     def __cascade(self,functions,args):
         if not isinstance(functions,list):
             functions = [functions]
@@ -94,6 +114,21 @@ class Tree:
                         for i in range(len(functions)):
                             fun = getattr(item,functions[i])
                             fun(*(args[i]))
+
+
+    def search(self,key):
+        if isinstance(self.nodes,dict):
+            try:
+                return self.nodes[key]
+            except KeyError:
+                return None
+
+        # List search does not work for some reason
+        if isinstance(self.nodes,list):
+            for item in self.nodes:
+                if str(item.name).lower() == str(key).lower():
+                    return item
+        return None
 
 
     def set_fancy(self, set_fancy: bool, cascade=False):
@@ -265,7 +300,12 @@ class Tree:
             except AttributeError:
                 string.append(f"{prefix}{name}")
         if self.nodes is not None:  # This object has some children nodes
-            for i in range(len(self.nodes)):  # Loops through each node
+            keys = []
+            if isinstance(self.nodes,list):
+                keys = [x for x in range(len(self.nodes))]
+            elif isinstance(self.nodes,dict):
+                keys = self.nodes.keys()
+            for i in keys:  # Loops through each node
                 item = self.nodes[i]
                 if isinstance(
                     item, Tree
